@@ -4,20 +4,14 @@ using UnityEngine;
 
 public class Player : Character
 {
+    public HitPoints hitPoints;
+
     public HealthBar healthBarPrefab;
     HealthBar healthbar;
 
     public Inventory inventoryPrefab;
     Inventory inventory;
 
-    public void Start()
-    {
-        hitPoints.value = startingHitPoints;
-
-        healthbar = Instantiate(healthBarPrefab);
-        inventory = Instantiate(inventoryPrefab);
-        healthbar.character = this;
-    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -59,4 +53,51 @@ public class Player : Character
 
         return false;
     }
+
+    public override IEnumerator DamageCharacter(int damage, float interval)
+    {
+        while(true)
+        {
+            StartCoroutine(FlickerCharacter());
+            hitPoints.value = hitPoints.value - damage;
+
+            if (hitPoints.value <= float.Epsilon)
+            {
+                KillCharacter();
+                break;
+            }
+
+            if (interval > float.Epsilon)
+            {
+                yield return new WaitForSeconds(interval);
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    public override void KillCharacter()
+    {
+        base.KillCharacter();
+
+        Destroy(healthbar.gameObject);
+        Destroy(inventory.gameObject);
+    }
+
+    public override void ResetCharacter()
+    {
+        healthbar = Instantiate(healthBarPrefab);
+        inventory = Instantiate(inventoryPrefab);
+        healthbar.character = this;
+
+        hitPoints.value = startingHitPoints;
+    }
+
+    private void OnEnable()
+    {
+        ResetCharacter();
+    }
+    
 }

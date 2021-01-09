@@ -17,6 +17,7 @@ public class HealthBar : MonoBehaviour
 
     void Start()
     {
+        if (character != null)
         maxHitpoints = character.maxHitPoints;
     }
 
